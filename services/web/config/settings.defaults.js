@@ -232,6 +232,9 @@ module.exports = {
         '127.0.0.1'
       }:3003`,
     },
+    geoIpLookup: {
+      cacheSize: intFromEnv('GEO_IP_LOOKUP_CACHE_SIZE', 10_000),
+    },
     docstore: {
       url: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,
       pubUrl: `http://${process.env.DOCSTORE_HOST || '127.0.0.1'}:3016`,
@@ -249,8 +252,12 @@ module.exports = {
           ? `http://${process.env.CLSI_LB_IP || process.env.CLSI_LB_HOST}:80`
           : `http://${process.env.DOWNLOAD_HOST || '127.0.0.1'}:8080`,
       backendGroupName: undefined,
-      submissionBackendClass:
-        process.env.CLSI_SUBMISSION_BACKEND_CLASS || 'c3d',
+      submissionCompileBackendClass:
+        process.env.CLSI_SUBMISSION_COMPILE_BACKEND_CLASS || 'free',
+      standardCompileBackendClass:
+        process.env.CLSI_STANDARD_COMPILE_BACKEND_CLASS || 'free',
+      priorityCompileBackendClass:
+        process.env.CLSI_PRIORITY_COMPILE_BACKEND_CLASS || 'premium',
     },
     clsiCache: {
       instances: JSON.parse(process.env.CLSI_CACHE_INSTANCES || '[]'),
@@ -425,6 +432,15 @@ module.exports = {
   }),
 
   // featuresEpoch: 'YYYY-MM-DD',
+
+  personalAccessTokens: {
+    expiry: {
+      warningWindowDays: intFromEnv(
+        'PERSONAL_ACCESS_TOKEN_WARNING_WINDOW_DAYS',
+        2
+      ),
+    },
+  },
 
   features: {
     personal: defaultFeatures,
@@ -1018,6 +1034,7 @@ module.exports = {
     tprFileViewNotOriginalImporter: [],
     contactUsModal: [],
     sourceEditorExtensions: [],
+    sourceEditorVisualExtensions: [],
     sourceEditorComponents: [],
     pdfLogEntryHeaderActionComponents: [],
     pdfLogEntryComponents: [],
@@ -1026,11 +1043,14 @@ module.exports = {
     diagnosticActions: [],
     sourceEditorCompletionSources: [],
     sourceEditorSymbolPalette: [],
+    sourceEditorToolbarStartButtons: [],
+    sourceEditorToolbarButtonGroups: [],
     sourceEditorToolbarComponents: [],
     sourceEditorToolbarEndButtons: [],
     rootContextProviders: [],
     mainEditorLayoutModals: [],
     mainEditorLayoutPanels: [],
+    pythonRunner: [],
     langFeedbackLinkingWidgets: [],
     labsExperiments: [],
     integrationLinkingWidgets: [],
@@ -1040,6 +1060,7 @@ module.exports = {
     editorLeftMenuSync: [],
     editorLeftMenuManageTemplate: [],
     menubarExtraComponents: [],
+    insertMenuSections: [],
     oauth2Server: [],
     managedGroupSubscriptionEnrollmentNotification: [],
     managedGroupEnrollmentInvite: [],
@@ -1080,7 +1101,8 @@ module.exports = {
     integrationPanelComponents: [],
     referenceSearchSetting: [],
     settingsModalEditorTabSections: [],
-    errorLogsComponents: [],
+    settingsModalSpellcheckSections: [],
+    editorFloatingMenuActions: [],
     referenceIndices: [],
     railEntries: [],
     railPopovers: [],
@@ -1109,7 +1131,7 @@ module.exports = {
 
   unsupportedBrowsers: {
     ie: '<=11',
-    safari: '<=14',
+    safari: '<15',
     firefox: '<=78',
   },
 
