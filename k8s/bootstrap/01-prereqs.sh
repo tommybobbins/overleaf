@@ -26,7 +26,7 @@ echo ""
 echo "Checking podman machine..."
 if ! podman machine list 2>/dev/null | grep -q running; then
   echo "  No running podman machine found. Starting default machine..."
-  podman machine init --memory 8192 --cpus 4 --disk-size 20 2>/dev/null || true
+  podman machine init --memory 8192 --cpus 4 --disk-size 40 2>/dev/null || true
   #podman machine init 2>/dev/null || true
   podman machine start
 else

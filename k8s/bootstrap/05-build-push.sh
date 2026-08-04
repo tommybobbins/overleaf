@@ -27,6 +27,11 @@ echo ""
 echo "==> Copying .dockerignore to repo root..."
 cp "${SERVER_CE}/.dockerignore" "${REPO_ROOT}/.dockerignore"
 
+echo "==> Adding the init scripts to the .dockerignore which break under podman..."
+grep -qxF 'server-ce/init_scripts/000_check_for_old_bind_mounts_5.sh' "${REPO_ROOT}/.dockerignore" || echo 'server-ce/init_scripts/000_check_for_old_bind_mounts_5.sh' >> "${REPO_ROOT}/.dockerignore" 
+grep -qxF 'server-ce/init_scripts/000_check_for_old_env_vars_5.sh' "${REPO_ROOT}/.dockerignore" || echo 'server-ce/init_scripts/000_check_for_old_env_vars_5.sh' >> "${REPO_ROOT}/.dockerignore" 
+grep -qxF 'server-ce/init_scripts/000_check_missing_secrets.sh' "${REPO_ROOT}/.dockerignore" || echo 'server-ce/init_scripts/000_check_missing_secrets.sh' >> "${REPO_ROOT}/.dockerignore" 
+
 echo ""
 echo "==> Building base image (server-ce/Dockerfile-base)..."
 podman build \
