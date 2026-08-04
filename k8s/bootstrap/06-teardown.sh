@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 echo "Deleting the overleaf cluster"
-kind delete cluster -n overleaf
+KIND_EXPERIMENTAL_PROVIDER=podman kind delete cluster -n overleaf
