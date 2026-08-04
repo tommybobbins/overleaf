@@ -1,13 +1,13 @@
 # Overleaf — Local Kubernetes Bootstrap
 
-Runs Overleaf Community Edition on a local [kind](https://kind.sigs.k8s.io/) cluster
+Runs Overleaf Community Edition on a local [kind](https://kind.sigs.k8s.io/) cluster with podman
 [Argo CD](https://argo-cd.readthedocs.io/) for GitOps deployment.
 All runtime images are pulled exclusively from localhost:5001 once bootstrapped.
 
 ## Architecture
 
 ```
-macOS (podman)
+OS (podman)
 │
 ├── kind cluster (podman provider)
 │   ├── local-repo  :5001  — local OCI registry
@@ -22,8 +22,9 @@ macOS (podman)
 
 ## Prerequisites
 
-- macOS with [Homebrew](https://brew.sh/)
+- If running on macOS with [Homebrew](https://brew.sh/)
 - `brew install kind kubectl helm podman argocd`
+- On Debian based distributions, install these tools using `apt`
 
 Run the prereqs check:
 
@@ -33,7 +34,7 @@ Run the prereqs check:
 
 This also initialises and starts the podman machine if one isn't running.
 
-## Step 1 — Create the kind cluster
+## Step 1 — Create the kind cluster (macOS brew install)
 
 ```bash
 ./k8s/bootstrap/02-cluster.sh
@@ -44,7 +45,7 @@ What it does:
 - Adds `localhost:5001` as an insecure registry in `~/.config/containers/registries.conf`
 
 > **Podman note**: kind uses `KIND_EXPERIMENTAL_PROVIDER=podman` automatically.
-> Port bindings go through the podman machine — `localhost:5001` on macOS reaches the local registry in podman
+> Port bindings go through the podman machine -  `localhost:5001` on macOS which reaches the local registry in podman
 
 ## Step 2 — Install Local Registry
 
@@ -64,9 +65,9 @@ Installs Argo CD via Helm and registers the Overleaf `Application` from
 `k8s/argocd/application.yaml`. Argo CD watches `k8s/charts/overleaf/` in the
 configured git repo and syncs on every commit.
 
-Access at **http://localhost:30080** — credentials printed by the script.
+Access [ArgoCD](http://localhost:30080). Once complete credentials printed are by the script.
 
-> By default `application.yaml` points at `https://github.com/overleaf/overleaf.git`.
+> By default `application.yaml` points at `https://github.com/tommybobbins/overleaf.git`.
 > For a fully sandboxed setup, deploy [Gitea](https://gitea.io/) inside the cluster
 > and update `repoURL` to point there.
 
@@ -171,11 +172,3 @@ k8s/
     ├── 04-argocd.sh
     └── 05-build-push.sh
 ```
-
-## Known limitations
-
-- **Sandboxed compiles** (`SANDBOXED_COMPILES`) are disabled. That feature requires
-  Docker sibling containers, which needs a privileged DinD sidecar in Kubernetes.
-- Local Repo is HTTP-only. 
-- The Argo CD `Application` uses the public GitHub remote. For offline use, add
-  Gitea to the cluster and mirror the repo there.
