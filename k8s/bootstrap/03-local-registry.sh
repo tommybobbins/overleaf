@@ -56,3 +56,6 @@ data:
     help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 EOF
 
+echo ""
+echo "Next: run 04-argocd.sh, to deploy ArgoCD."
+echo ""
