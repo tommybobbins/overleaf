@@ -44,8 +44,6 @@ redis:
     pullPolicy: IfNotPresent
   persistence:
     size: 1Gi
-  persistence:
-    size: 1Gi
 
 ingress:
   enabled: false
