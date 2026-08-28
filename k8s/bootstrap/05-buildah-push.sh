@@ -16,10 +16,10 @@ BASE_IMAGE="${REGISTRY}/${PROJECT}/overleaf-base:${TAG}"
 APP_IMAGE="${REGISTRY}/${PROJECT}/overleaf:${TAG}"
 
 echo "==> Logging podman into Registry..."
-podman login "${REGISTRY}" \
+buildah login "${REGISTRY}" \
+  --tls-verify=false \
   --username admin \
   --password "${PASSWORD}" \
-  --tls-verify=false
 
 # The Dockerfiles expect the build context to be the repo root.
 # server-ce/.dockerignore must be present at the repo root before building.
@@ -27,23 +27,21 @@ echo ""
 echo "==> Copying .dockerignore to repo root..."
 cp "${SERVER_CE}/.dockerignore" "${REPO_ROOT}/.dockerignore"
 
-echo "==> Adding the init scripts to the .dockerignore which break under podman..."
+echo "==> Adding the init scripts to the .dockerignore which break under buildah..."
 grep -qxF 'server-ce/init_scripts/000_check_for_old_bind_mounts_5.sh' "${REPO_ROOT}/.dockerignore" || echo 'server-ce/init_scripts/000_check_for_old_bind_mounts_5.sh' >> "${REPO_ROOT}/.dockerignore" 
 grep -qxF 'server-ce/init_scripts/000_check_for_old_env_vars_5.sh' "${REPO_ROOT}/.dockerignore" || echo 'server-ce/init_scripts/000_check_for_old_env_vars_5.sh' >> "${REPO_ROOT}/.dockerignore" 
 grep -qxF 'server-ce/init_scripts/000_check_missing_secrets.sh' "${REPO_ROOT}/.dockerignore" || echo 'server-ce/init_scripts/000_check_missing_secrets.sh' >> "${REPO_ROOT}/.dockerignore" 
 
 echo ""
 echo "==> Building base image (server-ce/Dockerfile-base)..."
-podman build \
-  --progress=plain \
+buildah build \
   --file "${SERVER_CE}/Dockerfile-base" \
   --tag "${BASE_IMAGE}" \
   "${REPO_ROOT}"
 
 echo ""
 echo "==> Building app image (server-ce/Dockerfile)..."
-podman build \
-  --progress=plain \
+buildah build \
   --file "${SERVER_CE}/Dockerfile" \
   --build-arg "OVERLEAF_BASE_TAG=${BASE_IMAGE}" \
   --tag "${APP_IMAGE}" \
@@ -51,8 +49,8 @@ podman build \
 
 echo ""
 echo "==> Pushing images to Registry..."
-podman push --tls-verify=false "${BASE_IMAGE}"
-podman push --tls-verify=false "${APP_IMAGE}"
+buildah push --tls-verify=false "${BASE_IMAGE}"
+buildah push --tls-verify=false "${APP_IMAGE}"
 
 echo ""
 echo "==> Mirroring mongo and redis into Local Registry..."
@@ -61,7 +59,7 @@ for PAIR in "mongo:8.0" "redis:6.2"; do
   echo "  ${PAIR} → ${DST}"
   podman pull "${PAIR}"
   podman tag "${PAIR}" "${DST}"
-  podman push --tls-verify=false "${DST}"
+  podman push --tls-verify=false "${DST}" 
 done
 
 echo ""
