@@ -9,6 +9,8 @@ if [[ -e /etc/debian_version ]]; then
   echo ""
   echo "This looks like a Debian based Linux"
   DEBIAN_VERSION=true
+else
+  DEBIAN_VERSION=false
 fi  
 
 for tool in "${REQUIRED_TOOLS[@]}"; do
@@ -20,7 +22,11 @@ for tool in "${REQUIRED_TOOLS[@]}"; do
   fi
 done
 
-if [[ ${#MISSING[@]} -gt 0 ]] && [[ ! -n ${DEBIAN_VERSION} ]]; then
+if [[ ${#MISSING[@]} -eq 0 ]]; then
+  echo ""
+  echo " Nothing missing. Continue"
+  exit 0
+elif [[ ${#MISSING[@]} -gt 0 ]] && [[ ! ${DEBIAN_VERSION} == "false" ]]; then
   echo ""
   echo "Missing tools: ${MISSING[*]}"
   echo ""
@@ -28,7 +34,7 @@ if [[ ${#MISSING[@]} -gt 0 ]] && [[ ! -n ${DEBIAN_VERSION} ]]; then
   echo "  brew install kind kubectl helm podman"
   echo "  brew install argocd"
   exit 1
-elif [[ ${#MISSING[@]} -gt 0 ]] &&  [[ -n ${DEBIAN_VERSION} ]]; then
+elif [[ ${#MISSING[@]} -gt 0 ]] &&  [[ ${DEBIAN_VERSION} == "true" ]]; then
   echo ""
   echo "Missing tools: ${MISSING[*]}"
   echo ""
@@ -45,12 +51,15 @@ elif [[ ${#MISSING[@]} -gt 0 ]] &&  [[ -n ${DEBIAN_VERSION} ]]; then
   echo "  rm -rf podman.tar.gz; rm -rf bin/podman-remote-static-linux_amd64"
   echo ""
   exit 1
+else 
+  echo "  I don't know what this version of *nux/macOS is"
+  exit 2
 fi
 
 echo ""
 echo "Checking podman machine..."
 
-if [ ! -z ${DEBIAN_VERSION} ]; then
+if [[ if ${DEBIAN_VERSION} == "true" ]]; then
   echo "  This still looks like Debian, no need to run podman machine init."
   echo ""
 elif [[ ! $(podman machine list 2>/dev/null | grep -q running) ]]; then
