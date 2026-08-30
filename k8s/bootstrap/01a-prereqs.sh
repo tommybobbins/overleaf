@@ -26,7 +26,7 @@ if [[ ${#MISSING[@]} -eq 0 ]]; then
   echo ""
   echo " Nothing missing. Continue"
   exit 0
-elif [[ ${#MISSING[@]} -gt 0 ]] && [[ ! ${DEBIAN_VERSION} == "false" ]]; then
+elif [[ ${#MISSING[@]} -gt 0 ]] && [[ ${DEBIAN_VERSION} == "false" ]]; then
   echo ""
   echo "Missing tools: ${MISSING[*]}"
   echo ""
